@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#172b3a">
+<title>Site Diary — Supervisor Logbook</title>
+<style>
+:root{--ink:#172b3a;--muted:#647482;--line:#dbe2e8;--bg:#f3f6f8;--card:#fff;--accent:#176b87;--soft:#eaf3f6;--good:#e8f4ed}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{background:var(--ink);color:#fff;padding:20px 18px 16px;position:sticky;top:0;z-index:5}header h1{font-size:21px;margin:0 0 4px}header p{margin:0;color:#d4e0e7;font-size:13px}
+nav{display:flex;gap:8px;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:70px;z-index:4}
+nav button{flex:1;border:0;border-radius:10px;padding:11px 6px;background:#eef2f5;color:var(--ink);font-weight:650;font-size:13px}
+nav button.active{background:var(--ink);color:#fff}
+main{max-width:720px;margin:auto;padding:14px 12px 40px}.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:12px;box-shadow:0 1px 2px #12202b08}
+h2{font-size:17px;margin:0 0 12px}.sub{color:var(--muted);font-size:13px;margin:-5px 0 12px}
+label{display:block;font-size:13px;font-weight:650;margin:11px 0 5px}
+input,textarea,select{width:100%;border:1px solid #cbd5dc;border-radius:10px;padding:12px;font:16px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:0;border-radius:11px;padding:13px 14px;background:var(--ink);color:#fff;font-size:15px;font-weight:700;width:100%;margin-top:9px}
+.btn.secondary{background:#eaf0f3;color:var(--ink)}.btn.teal{background:var(--accent)}
+.checkrow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #edf0f2;font-size:14px}
+.checkrow:last-child{border:0}.checkrow input{width:21px;height:21px;margin:0;flex:none;accent-color:var(--accent)}
+.checkrow small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.entry{border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0;background:#fff}
+.entrytop{display:flex;gap:8px;align-items:center}.entrytop input{width:105px}.entrytop button,.tiny{border:0;background:#edf1f4;border-radius:8px;padding:8px 10px;color:var(--ink);font-weight:650}
+.entry textarea{min-height:65px;margin-top:8px}
+.badge{font-size:12px;color:var(--accent);font-weight:700}
+.report{white-space:pre-wrap;background:#f6f8f9;border:1px solid var(--line);border-radius:10px;padding:12px;font:13px/1.45 ui-monospace,SFMono-Regular,monospace;max-height:420px;overflow:auto}
+.note{font-size:12px;color:var(--muted);line-height:1.45}.empty{color:var(--muted);font-size:14px;padding:12px 0}
+.historyitem{padding:12px 0;border-bottom:1px solid var(--line)}.historyitem:last-child{border:0}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:12px}
+@media(max-width:390px){.grid{grid-template-columns:1fr}nav button{font-size:12px}}
+</style>
+</head>
+<body>
+<header><h1>Supervisor's Site Diary</h1><p>Daily logbook · Saved on this device</p></header>
+<nav>
+<button class="active" data-tab="today">Today</button>
+<button data-tab="report">WhatsApp report</button>
+<button data-tab="history">History</button>
+</nav>
+<main>
+<section id="today" class="panel active">
+ <div class="card">
+  <h2>Project details</h2>
+  <label>Project / site</label><input id="project" placeholder="e.g. Boiler West – Power Plant">
+  <div class="grid"><div><label>Date</label><input id="date" type="date"></div><div><label>Working hours</label><input id="hours" value="08:00 – 16:30"></div></div>
+  <label>Supervisor</label><input id="supervisor" placeholder="Your name">
+  <label>Operatives on site</label><textarea id="operatives" placeholder="Names of everyone working on site" style="min-height:65px"></textarea>
+  <label>Weather / conditions</label><input id="weather" placeholder="Optional">
+  <button class="btn teal" id="saveDetails">Save details</button>
+ </div>
+ <div class="card">
+  <h2>Running work diary</h2><p class="sub">Add entries as the day progresses. Put the time, names and what happened.</p>
+  <div id="entries"></div>
+  <button class="btn secondary" id="addEntry">＋ Add timed entry</button>
+ </div>
+ <div class="card">
+  <h2>Supervisor's notes</h2>
+  <label>Safety observations / actions taken</label><textarea id="safetyNotes" placeholder="Hazards, near misses, corrective actions or observations."></textarea>
+  <label>Delays / issues / incidents</label><textarea id="issues" placeholder="Include reason, who was informed and action taken. Write None if none."></textarea>
+  <label>Materials, equipment and plan for tomorrow</label><textarea id="tomorrow" placeholder="Deliveries, outstanding work and next activities."></textarea>
+  <button class="btn teal" id="saveNotes">Save notes</button>
+ </div>
+ <div id="checks" class="checks-inline">
+ <div class="card"><h2>Safety checklists — Pre-start</h2><p class="sub">Tick only after the check has actually been completed. Keep required records and permits separately.</p>
+  <div id="prechecks"></div>
+ </div>
+ <div class="card"><h2>Ongoing checks</h2><p class="sub">Update as work progresses, after breaks/restarts and whenever conditions or tasks change.</p>
+  <div id="ongoingchecks"></div>
+  <label>Ongoing check notes (time and details)</label><textarea id="ongoingNotes" placeholder="e.g. 13:00 – POWRA reviewed and re-briefed after lunch."></textarea>
+ </div>
+ <div class="card"><h2>End-of-day security</h2>
+  <div id="endchecks"></div>
+  <p class="note">Tick once completed before leaving site. Follow site-specific isolation, parking and security procedures.</p>
+ </div>
+ <button class="btn teal" id="saveChecks">Save checklist</button>
+ </div>
+</section>
+<section id="report" class="panel">
+ <div class="card"><h2>WhatsApp-ready report</h2><p class="sub">Generate the full report, review it, then copy and paste into the correct project WhatsApp group.</p>
+  <button class="btn teal" id="generate">Generate report</button>
+  <div id="reportOutput" class="report" style="margin-top:12px">Your report will appear here.</div>
+  <button class="btn" id="copyReport">Copy report</button>
+  <p class="note">Check names, times, checklist status and wording before sending. A tick records that you completed a check; it does not replace the POWRA, machine inspection, permit or other formal site record.</p>
+ </div>
+</section>
+<section id="history" class="panel">
+ <div class="card"><h2>Saved diaries</h2><p class="sub">Daily records saved on this device in this browser.</p>
+  <div id="historyList"></div>
+  <button class="btn secondary" id="exportData">Export backup file</button>
+  <label>Restore from backup</label><input id="importFile" type="file" accept="application/json">
+  <p class="note">Important: browser storage can be cleared by iOS or manually. Export a backup regularly. This is a personal logbook, not an approved company safety-management or document-control system.</p>
+ </div>
+</section>
+<footer>Site Diary · Keep formal site records and company procedures up to date.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='supervisorSiteDiary_v1';
+const today=()=>new Date().toISOString().slice(0,10);
+let state={current:null,records:[]};
+const defaultChecks={
+ ppe:false,powra:false,machine:false,area:false,toolbox:false,permits:false,materials:false,
+ powraBreak:false,powraChange:false,machineOngoing:false,areaOngoing:false,security:false
+};
+function fresh(date=today()){return {date,project:'',hours:'08:00 – 16:30',supervisor:'',operatives:'',weather:'',entries:[],checks:{...defaultChecks},safetyNotes:'',ongoingNotes:'',issues:'',tomorrow:''}}
+function load(){try{let x=JSON.parse(localStorage.getItem(KEY)||'{}');state.records=x.records||[];state.current=x.current||fresh()}catch(e){state.current=fresh();state.records=[]}if(!state.current)state.current=fresh();if(!state.current.checks)state.current.checks={...defaultChecks};}
+function persist(){localStorage.setItem(KEY,JSON.stringify(state));}
+function archiveCurrent(){if(!state.current)return;let r=state.records.filter(x=>x.date!==state.current.date);r.unshift(JSON.parse(JSON.stringify(state.current)));state.records=r.sort((a,b)=>b.date.localeCompare(a.date));persist();}
+function val(id){return $(id).value}
+function bindFields(){['project','date','hours','supervisor','operatives','weather','safetyNotes','ongoingNotes','issues','tomorrow'].forEach(id=>{let el=$(id);el.value=state.current[id]??'';el.addEventListener('input',()=>{state.current[id]=el.value;persist()})})}
+function drawEntries(){let root=$('entries');root.innerHTML='';state.current.entries.forEach((e,i)=>{let d=document.createElement('div');d.className='entry';d.innerHTML=`<div class="entrytop"><input type="time" aria-label="Entry time" value="${esc(e.time||'08:00')}" data-time="${i}"><span class="badge">DIARY ENTRY ${i+1}</span><button class="tiny" data-del="${i}">Delete</button></div><textarea data-body="${i}" placeholder="What happened? Who was involved?">${esc(e.body||'')}</textarea>`;root.appendChild(d)});root.querySelectorAll('[data-time]').forEach(el=>el.onchange=()=>{state.current.entries[+el.dataset.time].time=el.value;persist()});root.querySelectorAll('[data-body]').forEach(el=>el.oninput=()=>{state.current.entries[+el.dataset.body].body=el.value;persist()});root.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{state.current.entries.splice(+el.dataset.del,1);persist();drawEntries()})}
+const groups={
+ pre:[['ppe','All PPE correct and suitable for the task'],['powra','POWRA completed, briefed and signed'],['machine','Machine pre-use checks completed'],['area','Work area and exclusion zones checked'],['toolbox','Toolbox talk completed, where required'],['permits','Relevant permits checked and in place'],['materials','Materials and deliveries checked']],
+ ongoing:[['powraBreak','POWRA reviewed after breaks and work restarts'],['powraChange','POWRA reviewed when work, conditions or risks change'],['machineOngoing','Machine / equipment condition monitored'],['areaOngoing','Work area and exclusion zones monitored']],
+ end:[['security','Tools and equipment secured and work area left safe']]
+};
+function drawChecks(){[['prechecks','pre'],['ongoingchecks','ongoing'],['endchecks','end']].forEach(([id,g])=>{let root=$(id);root.innerHTML='';groups[g].forEach(([key,label])=>{let row=document.createElement('label');row.className='checkrow';row.innerHTML=`<input type="checkbox" data-check="${key}" ${state.current.checks[key]?'checked':''}><span>${label}</span>`;root.appendChild(row)})});document.querySelectorAll('[data-check]').forEach(el=>el.onchange=()=>{state.current.checks[el.dataset.check]=el.checked;persist()})}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function checksText(keys){return keys.map(([k,l])=>(state.current.checks[k]?'☑ ':'☐ ')+l).join('\n')}
+function makeReport(){let c=state.current;let entries=[...c.entries].filter(e=>e.body.trim()).sort((a,b)=>(a.time||'').localeCompare(b.time||''));return `DAILY SITE DIARY
+
+Project: ${c.project||'Not specified'}
+Date: ${c.date}
+Supervisor: ${c.supervisor||'Not specified'}
+Operatives: ${c.operatives||'Not specified'}
+Working hours: ${c.hours||'Not specified'}
+Weather: ${c.weather||'Not recorded'}
+
+TIMED WORK DIARY
+${entries.length?entries.map(e=>`${e.time||'Time not recorded'} – ${e.body.trim()}`).join('\n\n'):'No diary entries recorded.'}
+
+ADDITIONAL NOTES
+
+SAFETY OBSERVATIONS / ACTIONS
+${c.safetyNotes||'Not recorded.'}
+
+DELAYS / ISSUES / INCIDENTS
+${c.issues||'Not recorded.'}
+
+MATERIALS / EQUIPMENT / PLAN FOR TOMORROW
+${c.tomorrow||'Not recorded.'}
+
+SAFETY & COMPLIANCE CHECKLIST
+
+PRE-START CHECKS
+${checksText(groups.pre)}
+
+ONGOING CHECKS
+${checksText(groups.ongoing)}
+${c.ongoingNotes?'\nOngoing check notes:\n'+c.ongoingNotes:''}
+
+END-OF-DAY CHECKS
+${checksText(groups.end)}
+
+End of report.`}
+function renderHistory(){let root=$('historyList');root.innerHTML='';let all=[state.current,...state.records.filter(r=>r.date!==state.current.date)].sort((a,b)=>b.date.localeCompare(a.date));if(!all.length){root.innerHTML='<div class="empty">No saved diaries yet.</div>';return}all.forEach(r=>{let d=document.createElement('div');d.className='historyitem';d.innerHTML=`<strong>${esc(r.date)}</strong><div>${esc(r.project||'Unnamed project')} · ${(r.entries||[]).length} entries</div><button class="tiny" data-open="${esc(r.date)}">Open diary</button>`;root.appendChild(d)});root.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{let date=b.dataset.open;if(date!==state.current.date){archiveCurrent();let found=state.records.find(x=>x.date===date);if(found)state.current=JSON.parse(JSON.stringify(found))}bindRefresh();switchTab('today')})}
+function bindRefresh(){['project','date','hours','supervisor','operatives','weather','safetyNotes','ongoingNotes','issues','tomorrow'].forEach(id=>$(id).value=state.current[id]??'');drawEntries();drawChecks();persist()}
+function switchTab(id){document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));if(id==='history')renderHistory();if(id==='report'){$('reportOutput').textContent=makeReport()}}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+$('addEntry').onclick=()=>{let now=new Date();state.current.entries.push({time:now.toTimeString().slice(0,5),body:''});persist();drawEntries();let t=$('entries').querySelector('textarea:last-of-type');if(t)t.focus()};
+$('saveDetails').onclick=()=>{persist();alert('Project details saved on this iPhone.')};
+$('saveNotes').onclick=()=>{persist();alert('Supervisor notes saved.')};
+$('saveChecks').onclick=()=>{persist();alert('Checklist saved.')};
+$('generate').onclick=()=>{persist();$('reportOutput').textContent=makeReport();archiveCurrent();};
+$('copyReport').onclick=async()=>{let text=makeReport();try{await navigator.clipboard.writeText(text);alert('Report copied. Open WhatsApp and paste it into the project group.')}catch(e){let area=document.createElement('textarea');area.value=text;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();alert('Report copied. Open WhatsApp and paste it into the project group.')}};
+$('exportData').onclick=()=>{archiveCurrent();let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='site-diary-backup-'+today()+'.json';a.click();URL.revokeObjectURL(a.href)};
+$('importFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let x=JSON.parse(await f.text());if(!x.current||!Array.isArray(x.records))throw Error();state=x;persist();bindRefresh();alert('Backup restored.')}catch(err){alert('That backup file could not be read.')}};
+load();if(!state.current.date)state.current.date=today();bindFields();drawEntries();drawChecks();persist();
+</script>
+</body></html>
